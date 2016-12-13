@@ -1,27 +1,24 @@
 package devoir2_secu;
 
 
-
 //notes :
 //le nb premier doit être supérieur à 10 sans quoi l'encryption n'est possible qu'avec 0 caractère
 
 
-
 import java.math.BigInteger;
 import java.util.Random;
+import java.util.Scanner;
 import java.security.SecureRandom;
 
 public class ElGamal {
 	
-	private static int nbBits = 12;
 	
-	public static Cle GenererClesElgamal(BigInteger a){
+	public static Cle GenererClesElgamal(BigInteger a, int nbBits){
 		Random rand = new SecureRandom();
 		boolean cleValide = false;
 		boolean generateurValide = false;
 		BigInteger bigTwo = new BigInteger("2");
-		Cle cleK = new Cle(a);
-		cleK.set_nbBits(nbBits);
+		Cle cleK = new Cle(a,nbBits);
 		
 		BigInteger compteur = BigInteger.ZERO;
 		
@@ -76,7 +73,7 @@ public class ElGamal {
 		Random rand = new SecureRandom();
 		MessageEncrypte C = new MessageEncrypte();
 		C.set_c("");
-		BigInteger b = new BigInteger(nbBits, rand);
+		BigInteger b = new BigInteger(cleK.get_nbBits(), rand);
 System.out.println("La clé temporaire b est tel que b = " + b.toString());
 		
 		String M = "";
@@ -211,6 +208,7 @@ System.out.println("La clé temporaire b est tel que b = " + b.toString());
 		}
 		
 		M += "#";
+		//Boucle parcourant le message lettre par lettre pour convertir en code ascii
 		while (M.charAt(0) != "#".charAt(0)){
 			bufferInt = Integer.parseInt(M.substring(0, 2));
 			M = M.substring(2);
@@ -230,6 +228,7 @@ System.out.println("La clé temporaire b est tel que b = " + b.toString());
 		BigInteger k;
 		
 		m += "#";
+		//Boucle parcourant le message lettre par lettre pour convertir en code ascii
 		while (m.charAt(0) != "#".charAt(0)){
 			charBuffer = m.charAt(0);
 			m = m.substring(1);
@@ -246,7 +245,7 @@ System.out.println("La clé temporaire b est tel que b = " + b.toString());
 			// q est sur nbBits donc 2*q est sur nbBits + 1 donc l'intervalle [1, p-1]
 			//équivault à un random sur (nbBits+1) + 1
 			while (true){
-				k = new BigInteger(nbBits + 1, rand).add(BigInteger.ONE); 
+				k = new BigInteger(cleK.get_nbBits() + 1, rand).add(BigInteger.ONE); 
 				if (k.compareTo(BigInteger.ONE) == 1 && k.compareTo(cleK.get_p().subtract(BigInteger.ONE)) == -1 && k.gcd(cleK.get_p().subtract(BigInteger.ONE)).compareTo(BigInteger.ONE) == 0){ //On vérifie que k est bien plus petit que p.
 					break;
 				}
@@ -272,46 +271,500 @@ System.out.println("La clé temporaire b est tel que b = " + b.toString());
 		
 		
 		m += "#";
+		//Boucle parcourant le message lettre par lettre pour convertir en code ascii
 		while (m.charAt(0) != "#".charAt(0)){
 			charBuffer = m.charAt(0);
 			m = m.substring(1);
 			stringBuffer += (int)charBuffer;
 		}
 		
-		M = new BigInteger(stringBuffer);
+		M = new BigInteger(stringBuffer); //création du BigInteger contenant tous les codes ascii.
+		//Calcul de H(M)
 		hDeM = M.modPow(BigInteger.ONE.add(BigInteger.ONE), cleK.get_p());
+		//On retourne ensuite le boolean correspondant à la vérification de la signature de la clé.
 		return ( cleK.get_g().modPow(hDeM,cleK.get_p()).compareTo(((cleK.get_y().modPow(rs.get_r(),cleK.get_p())).multiply(rs.get_r().modPow(rs.get_s(),cleK.get_p()))).mod(cleK.get_p())) == 0 );
 	}
 	
  	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		BigInteger a = new BigInteger("7");
+ 		Scanner sc = new Scanner(System.in);
+		BigInteger a = BigInteger.ZERO;
+		BigInteger g = BigInteger.ZERO;
+		BigInteger p = BigInteger.ZERO;
+		BigInteger y = BigInteger.ZERO;
+		BigInteger C = BigInteger.ZERO;
+		BigInteger Y = BigInteger.ZERO;
+		BigInteger s = BigInteger.ZERO;
+		BigInteger r = BigInteger.ZERO;
+		String message = "";
+		boolean flag = true;
+		MessageEncrypte messageEncrypte = new MessageEncrypte();
+		MessageSigne messageSigne = new MessageSigne();
+		int choix;
 		
-		System.out.println("El Gamal");
-		System.out.println("Génération de la clé à partir de a = " + a.toString());
-		System.out.println("Le nombre premier q dans p = 2*q+1 sera sur " + Integer.toString(nbBits)  + " bits.");
-		MessageEncrypte C = new MessageEncrypte();
-		Cle test = GenererClesElgamal(a);
+		//Le choix du nombre de bite va servir comme taille des nombres premiers aléatoires g et p.
+		int nbBits;
+		System.out.println("Bienvenue dans le programme ElGamal.");
+		System.out.println("Veuillez indiquer le nombre de bit des nombres avec lesquels travailler :");
+		//Boucle de récupération de l'entrée.
+		while (true){
+			System.out.print("Enter un chiffre entre un entier supérieur à 3 \n");
+			if (!sc.hasNextInt()){
+				sc.nextLine();
+				System.out.println("Vous n'avez pas entré un chiffre.\n");
+				continue;
+			}
+			nbBits = sc.nextInt();
+			if (nbBits > 3){
+				break;
+			}
+	    }
+		Cle cleUtilisateur = new Cle(nbBits);
 		
-		String messageAEncrypter = "QWERTZ";
-		System.out.println("\nMessage à encrpter : " + messageAEncrypter);
-		C = EncrypterElGamal(messageAEncrypter, test);
-		
-		System.out.println("\nLe message encrypté est = " + C.get_c());
-		System.out.println("La clé temporaire encryptée vaut =  " + C.get_Y());
-		
-		String message;
-		message = DecrypterElGamal(C, test);
-		System.out.println("\nMessage décrypté = " + message);
-		
-		String messageASigner = "COUCOU";
-		System.out.println("\nSignature du message = " + messageASigner);
-		MessageSigne rs = SignerElGamal(messageASigner,test);
-		System.out.println("r = " + rs.get_r().toString());
-		System.out.println("s = " + rs.get_s().toString());
-		
-		System.out.println("\nLa signature est = " + VerifierSignatureElGamal(messageASigner, rs, test));
-
-		
+		//Boucle principale du programme.
+		while (true){
+			//Menu
+			System.out.println("Quelle fonction voulez-vous tester ?");
+			System.out.println("1-GenererClesElgamal");
+			System.out.println("2-EncrypterElGamal");
+			System.out.println("3-DecrypterElGamal");
+			System.out.println("4-SignerElGamal");
+			System.out.println("5-VerifierSignatureElGamal");
+			System.out.println("6-Quitter le programme");
+			
+			//Boucle de récupération du choix du menu.
+			while (true){
+				System.out.print("Enter un chiffre entre 1 et 6 : \n");
+				if (!sc.hasNextInt()){
+					sc.nextLine();
+					System.out.println("Vous n'avez pas entré un chiffre.\n");
+					continue;
+				}
+				choix = sc.nextInt();
+				if (choix < 7 && choix >0){
+					break;
+				}
+		    }
+			
+			//Le switch permet d'executer la partie du programme correspondant au choix du menu.
+			switch (choix){
+				
+				case 1: //Génération d'une clé
+					cleUtilisateur = new Cle(nbBits); //remise à zero de l'objet
+					System.out.println("Vous avez choisi de générer une clé. Merci d'entrer une clé secrète \"a\"qui doit être un entier supérieur à 0.");
+					System.out.println("Ce programme utilisant la bibliothèque BigInteger, vous pouvez théoriquement entrer une clé secrète aussi grande que vous le voulez.");
+					System.out.println("La seule limite sera la mémoire de votre machine");
+					//Boucle de récupération de l'entrée.
+					while (true){
+						System.out.print("\nEnter un entier supérieur à 0\n");
+						if (!sc.hasNextBigInteger()){
+							sc.nextLine();
+							System.out.println("Vous n'avez pas entré un nombre entier\n");
+							continue;
+						}
+						a = sc.nextBigInteger();
+						if (a.compareTo(BigInteger.ZERO) == 1){
+							break;
+						}
+				    }
+					//On appel la fonction de génération de clé
+					cleUtilisateur = GenererClesElgamal(a,nbBits);
+					System.out.println("Voici les paramètres générés :");
+					System.out.println("a = " + cleUtilisateur.get_a().toString());
+					System.out.println("g = " + cleUtilisateur.get_g().toString());
+					System.out.println("q = " + cleUtilisateur.get_q().toString());
+					System.out.println("p = 2*q+1" + cleUtilisateur.get_p().toString());
+					System.out.println("y = g^a mod p = " + cleUtilisateur.get_y().toString() + "\n\n");
+					break;
+					
+				case 2: //Encryption d'un message
+					cleUtilisateur = new Cle(nbBits); //remise à zero de l'objet
+					System.out.println("Vous avez choisi d'encrypter un message.");
+					System.out.println("Merci d'entrer le message m à encrypter. Il peut être composé de lettres et de caractères d'espacement uniquement.");
+					System.out.println("Ce programme utilisant la bibliothèque BigInteger, vous pouvez théoriquement entrer un message aussi grand que vous le voulez.");
+					System.out.println("La seule limite sera la mémoire de votre machine");
+					flag = true;
+					//Boucle de récupération de l'entrée.
+					while (flag){
+						System.out.print("Merci d'entrer un message composé de lettre et de caractère d'espacement.\n");
+						message = sc.next();
+						message = message.toUpperCase();
+						flag = false;
+						for (int i = 0; i<message.length(); i++){
+							if (!(((int)message.charAt(i)) > 9 && ((int)message.charAt(i)) < 100)){
+								flag = true;
+							}
+						}
+				    }
+					System.out.println("Merci d'entrer le générateur g :");
+					//Boucle de récupération de l'entrée.
+					while (true){
+						System.out.print("Enter un entier supérieur à 0\n");
+						if (!sc.hasNextBigInteger()){
+							sc.nextLine();
+							System.out.println("Vous n'avez pas entré un nombre entier\n");
+							continue;
+						}
+						g = sc.nextBigInteger();
+						if (g.compareTo(BigInteger.ZERO) == 1){
+							break;
+						}
+				    }
+					cleUtilisateur.set_g(g);
+					System.out.println("Merci d'entrer le nombre premier p tel que p=2q+1 :");
+					//Boucle de récupération de l'entrée.
+					while (true){
+						System.out.print("Enter un entier supérieur à 0\n");
+						if (!sc.hasNextBigInteger()){
+							sc.nextLine();
+							System.out.println("Vous n'avez pas entré un nombre entier\n");
+							continue;
+						}
+						p = sc.nextBigInteger();
+						if (!p.isProbablePrime(200)){
+							System.out.println("Vous n'avez pas entré un nombre premier.\n");
+							continue;
+						}
+						if (p.compareTo(BigInteger.ZERO) == 1){
+							break;
+						}
+				    }
+					cleUtilisateur.set_p(p);
+					System.out.println("Merci d'entrer le nombre y tel que y=g^a mod p :");
+					//Boucle de récupération de l'entrée.
+					while (true){
+						System.out.print("Enter un entier supérieur à 0 et inférieur à p\n");
+						if (!sc.hasNextBigInteger()){
+							sc.nextLine();
+							System.out.println("Vous n'avez pas entré un nombre entier\n");
+							continue;
+						}
+						y = sc.nextBigInteger();
+						if (g.compareTo(BigInteger.ZERO) == 1 && g.compareTo(p) == -1){
+							break;
+						}
+						else {
+							System.out.println("Vous n'avez pas entré un nombre y supérieur à 0 et inférieur à p\n");
+						}
+				    }
+					cleUtilisateur.set_y(y);
+					//On appel ensuite la fonction d'encryption du message.
+					messageEncrypte = EncrypterElGamal (message,cleUtilisateur);
+					System.out.println("Voici le message encrypté :");
+					System.out.println(messageEncrypte.get_c());
+					System.out.println("Voici la valeur de Y = g^b mod p :");
+					System.out.println(messageEncrypte.get_Y().toString()+ "\n\n");
+					break;
+					
+					
+				case 3: //Décryption d'un message
+					cleUtilisateur = new Cle(nbBits); //remise à zero de l'objet
+					System.out.println("Vous avez choisi de décrypter un message.");
+					System.out.println("Merci d'entrer le message C à décrypter :");
+					//Boucle de récupération de l'entrée.
+					while (true){
+						System.out.print("Enter un entier supérieur à 0\n");
+						if (!sc.hasNextBigInteger()){
+							sc.nextLine();
+							System.out.println("Vous n'avez pas entré un nombre entier\n");
+							continue;
+						}
+						C = sc.nextBigInteger();
+						if (C.compareTo(BigInteger.ZERO) == 1){
+							break;
+						}
+				    }
+					messageEncrypte.set_c(C.toString());
+					
+					System.out.println("Merci d'entrer Y = g^b mod p :");
+					//Boucle de récupération de l'entrée.
+					while (true){
+						System.out.print("Enter un entier supérieur à 0\n");
+						if (!sc.hasNextBigInteger()){
+							sc.nextLine();
+							System.out.println("Vous n'avez pas entré un nombre entier\n");
+							continue;
+						}
+						Y = sc.nextBigInteger();
+						if (Y.compareTo(BigInteger.ZERO) == 1){
+							break;
+						}
+					}
+					messageEncrypte.set_Y(Y);
+					
+					System.out.println("Merci d'entrée la clé secrète \"a\"");
+					//Boucle de récupération de l'entrée.
+					while (true){
+						System.out.print("\nEnter un entier supérieur à 0\n");
+						if (!sc.hasNextBigInteger()){
+							sc.nextLine();
+							System.out.println("Vous n'avez pas entré un nombre entier\n");
+							continue;
+						}
+						a = sc.nextBigInteger();
+						if (a.compareTo(BigInteger.ZERO) == 1){
+							break;
+						}
+				    }
+					cleUtilisateur.set_a(a);
+					
+					System.out.println("Merci d'entrer le nombre premier p tel que p=2q+1 :");
+					//Boucle de récupération de l'entrée.
+					while (true){
+						System.out.print("Enter un entier supérieur à 0\n");
+						if (!sc.hasNextBigInteger()){
+							sc.nextLine();
+							System.out.println("Vous n'avez pas entré un nombre entier\n");
+							continue;
+						}
+						p = sc.nextBigInteger();
+						if (!p.isProbablePrime(200)){
+							System.out.println("Vous n'avez pas entré un nombre premier.\n");
+							continue;
+						}
+						if (p.compareTo(BigInteger.ZERO) == 1){
+							break;
+						}
+				    }
+					cleUtilisateur.set_p(p);
+					
+					System.out.println("Merci d'entrer le générateur g :");
+					//Boucle de récupération de l'entrée.
+					while (true){
+						System.out.print("Enter un entier supérieur à 0\n");
+						if (!sc.hasNextBigInteger()){
+							sc.nextLine();
+							System.out.println("Vous n'avez pas entré un nombre entier\n");
+							continue;
+						}
+						g = sc.nextBigInteger();
+						if (g.compareTo(BigInteger.ZERO) == 1){
+							break;
+						}
+				    }
+					cleUtilisateur.set_g(g);
+					
+					//Appel de la fonction d'encryption du message
+					message = DecrypterElGamal (messageEncrypte,cleUtilisateur);
+					System.out.println("Voici le message décrypté :");
+					System.out.println(message + "\n\n");
+					break;
+					
+				case 4: //Signature d'un message
+					cleUtilisateur = new Cle(nbBits); //remise à zero de l'objet
+					System.out.println("Vous avez choisi de signer un message.");
+					System.out.println("Merci d'entrer le message m à encrypter. Il peut être uniquement composé de lettres et de caractères d'espacement.");
+					System.out.println("Ce programme utilisant la bibliothèque BigInteger, vous pouvez théoriquement entrer un message aussi grand que vous le voulez.");
+					System.out.println("La seule limite sera la mémoire de votre machine");
+					flag = true;
+					//Boucle de récupération de l'entrée.
+					while (flag){
+						System.out.print("Merci d'entrer un message composé de lettre et de caractère d'espacement.\n");
+						message = sc.next();
+						message = message.toUpperCase();
+						flag = false;
+						for (int i = 0; i<message.length(); i++){
+							if (!(((int)message.charAt(i)) > 9 && ((int)message.charAt(i)) < 100)){
+								flag = true;
+							}
+						}
+				    };
+				    
+				    System.out.println(" Merci d'entrer la clé secrète \"a\" doit être un entier supérieur à 0.");
+					while (true){
+						System.out.print("\nEnter un entier supérieur à 0\n");
+						if (!sc.hasNextBigInteger()){
+							sc.nextLine();
+							System.out.println("Vous n'avez pas entré un nombre entier\n");
+							continue;
+						}
+						a = sc.nextBigInteger();
+						if (a.compareTo(BigInteger.ZERO) == 1){
+							break;
+						}
+				    }
+				    cleUtilisateur.set_a(a);
+				    
+				    System.out.println("Merci d'entrer le générateur g :");
+				  //Boucle de récupération de l'entrée.
+				    while (true){
+						System.out.print("Enter un entier supérieur à 0\n");
+						if (!sc.hasNextBigInteger()){
+							sc.nextLine();
+							System.out.println("Vous n'avez pas entré un nombre entier\n");
+							continue;
+						}
+						g = sc.nextBigInteger();
+						if (g.compareTo(BigInteger.ZERO) == 1){
+							break;
+						}
+				    }
+					cleUtilisateur.set_g(g);
+					
+					System.out.println("Merci d'entrer le nombre premier p tel que p=2q+1 :");
+					//Boucle de récupération de l'entrée.
+					while (true){
+						System.out.print("Enter un entier supérieur à 0\n");
+						if (!sc.hasNextBigInteger()){
+							sc.nextLine();
+							System.out.println("Vous n'avez pas entré un nombre entier\n");
+							continue;
+						}
+						p = sc.nextBigInteger();
+						if (!p.isProbablePrime(200)){
+							System.out.println("Vous n'avez pas entré un nombre premier.\n");
+							continue;
+						}
+						if (p.compareTo(BigInteger.ZERO) == 1){
+							break;
+						}
+				    }
+					cleUtilisateur.set_p(p);
+					
+					System.out.println("Merci d'entrer le nombre y tel que y=g^a mod p :");
+					//Boucle de récupération de l'entrée.
+					while (true){
+						System.out.print("Enter un entier supérieur à 0 et inférieur à p\n");
+						if (!sc.hasNextBigInteger()){
+							sc.nextLine();
+							System.out.println("Vous n'avez pas entré un nombre entier\n");
+							continue;
+						}
+						y = sc.nextBigInteger();
+						if (y.compareTo(BigInteger.ZERO) == 1){
+							break;
+						}
+						else {
+							System.out.println("Vous n'avez pas entré un nombre y supérieur à 0 et inférieur à p\n");
+						}
+				    }
+					cleUtilisateur.set_y(y);
+				    
+					//Appel de la fonction de signature
+					messageSigne = SignerElGamal(message,cleUtilisateur);
+				    System.out.println("Voici le message signé :");
+					System.out.println(messageSigne.get_s().toString());
+					System.out.println("Voici la valeur de r = g^k mod p :");
+					System.out.println(messageSigne.get_r().toString()+ "\n\n");
+					break;
+					
+				case 5: //Vérification de la signature d'un message
+					cleUtilisateur = new Cle(nbBits);
+					System.out.println("Vous avez choisi de vérifier une signature");
+					System.out.println("Merci d'entrer le message m à vérifier");
+					flag = true;
+					//Boucle de récupération de l'entrée.
+					while (flag){
+						System.out.print("Merci d'entrer un message composé de lettre et de caractère d'espacement.\n");
+						message = sc.next();
+						message = message.toUpperCase();
+						flag = false;
+						for (int i = 0; i<message.length(); i++){
+							if (!(((int)message.charAt(i)) > 9 && ((int)message.charAt(i)) < 100)){
+								flag = true;
+							}
+						}
+				    };
+				    
+				    System.out.println("Merci le paramètre \"s\" de la signature :");
+				    //Boucle de récupération de l'entrée.
+				    while (true){
+						System.out.print("Enter un entier supérieur à 0\n");
+						if (!sc.hasNextBigInteger()){
+							sc.nextLine();
+							System.out.println("Vous n'avez pas entré un nombre entier\n");
+							continue;
+						}
+						s = sc.nextBigInteger();
+						if (s.compareTo(BigInteger.ZERO) == 1){
+							break;
+						}
+				    }
+					messageSigne.set_s(s);
+					
+					System.out.println("Merci le paramètre \"r\" de la signature :");
+					//Boucle de récupération de l'entrée.
+					while (true){
+						System.out.print("Enter un entier supérieur à 0\n");
+						if (!sc.hasNextBigInteger()){
+							sc.nextLine();
+							System.out.println("Vous n'avez pas entré un nombre entier\n");
+							continue;
+						}
+						r = sc.nextBigInteger();
+						if (r.compareTo(BigInteger.ZERO) == 1){
+							break;
+						}
+				    }
+					messageSigne.set_r(r);
+				    
+					System.out.println("Merci d'entrer le générateur g :");
+					//Boucle de récupération de l'entrée.
+					while (true){
+						System.out.print("Enter un entier supérieur à 0\n");
+						if (!sc.hasNextBigInteger()){
+							sc.nextLine();
+							System.out.println("Vous n'avez pas entré un nombre entier\n");
+							continue;
+						}
+						g = sc.nextBigInteger();
+						if (g.compareTo(BigInteger.ZERO) == 1){
+							break;
+						}
+				    }
+					cleUtilisateur.set_g(g);
+					
+					System.out.println("Merci d'entrer le nombre premier p tel que p=2q+1 :");
+					//Boucle de récupération de l'entrée.
+					while (true){
+						System.out.print("Enter un entier supérieur à 0\n");
+						if (!sc.hasNextBigInteger()){
+							sc.nextLine();
+							System.out.println("Vous n'avez pas entré un nombre entier\n");
+							continue;
+						}
+						p = sc.nextBigInteger();
+						if (!p.isProbablePrime(200)){
+							System.out.println("Vous n'avez pas entré un nombre premier.\n");
+							continue;
+						}
+						if (p.compareTo(BigInteger.ZERO) == 1){
+							break;
+						}
+				    }
+					cleUtilisateur.set_p(p);
+					
+					System.out.println("Merci d'entrer le nombre y tel que y=g^a mod p :");
+					//Boucle de récupération de l'entrée.
+					while (true){
+						System.out.print("Enter un entier supérieur à 0 et inférieur à p\n");
+						if (!sc.hasNextBigInteger()){
+							sc.nextLine();
+							System.out.println("Vous n'avez pas entré un nombre entier\n");
+							continue;
+						}
+						y = sc.nextBigInteger();
+						if (y.compareTo(BigInteger.ZERO) == 1 ){
+							break;
+						}
+						else {
+							System.out.println("Vous n'avez pas entré un nombre y supérieur à 0 et inférieur à p\n");
+						}
+				    }
+					cleUtilisateur.set_y(y);
+					
+					if(VerifierSignatureElGamal (message, messageSigne, cleUtilisateur)){
+						System.out.println("La signature est correcte");
+					}
+					else{
+						System.out.println("La signature est incorrecte");
+					}
+					break;
+					
+				case 6: 
+					sc.close();
+					System.exit(0);
+					break;
+			}
+		}
 	}
 }

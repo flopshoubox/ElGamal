@@ -5,7 +5,7 @@ import java.math.BigInteger;
 public class MessageSigne {
 
 		private BigInteger s; //Le message crypté
-		private BigInteger r;
+		private BigInteger r; //g^k mod p
 		
 		public MessageSigne(BigInteger s, BigInteger r){
 			this.s = s;

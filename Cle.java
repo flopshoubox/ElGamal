@@ -10,6 +10,7 @@ public class Cle {
 	private BigInteger p; // p est un premier tq p = 2q+1
 	private BigInteger g; // g est un générateur de Z* p qui génère un sous-groupe d'ordre q
 	private int nbBits;
+
 	
 	public Cle (BigInteger a, BigInteger g, BigInteger gExpAmodP, BigInteger p, int nbBits){
 		this.a = a;
@@ -19,9 +20,12 @@ public class Cle {
 		this.nbBits = nbBits;
 	}
 	
-	public Cle (BigInteger a){
+	public Cle (BigInteger a, int nbBits){
 		this.a = a;
-		this.nbBits = 32;
+		this.nbBits = nbBits;
+	}
+	public Cle (int nbBits){
+		this.nbBits = nbBits;
 	}
 	
 	public void set_a (BigInteger a) {
