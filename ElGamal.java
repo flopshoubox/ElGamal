@@ -1,5 +1,3 @@
-package devoir2_secu;
-
 
 //notes :
 //le nb premier doit être supérieur à 10 sans quoi l'encryption n'est possible qu'avec 0 caractère
@@ -57,11 +55,7 @@ public class ElGamal {
 		}
 		
 		cleK.set_y(cleK.get_g().modPow(cleK.get_a(), cleK.get_p()));
-		System.out.println("a : " + cleK.get_a().toString());
-		System.out.println("g : " + cleK.get_g().toString());
-		System.out.println("y : " + cleK.get_y().toString());
-		System.out.println("q : " + cleK.get_q().toString());
-		System.out.println("p : " + cleK.get_p().toString());
+
 		
 		
 		return cleK;
@@ -74,7 +68,6 @@ public class ElGamal {
 		MessageEncrypte C = new MessageEncrypte();
 		C.set_c("");
 		BigInteger b = new BigInteger(cleK.get_nbBits(), rand);
-System.out.println("La clé temporaire b est tel que b = " + b.toString());
 		
 		String M = "";
 		char charBuffer;
@@ -90,7 +83,6 @@ System.out.println("La clé temporaire b est tel que b = " + b.toString());
 			charBuffer = m.charAt(0);
 			m = m.substring(1);
 			M += (int)charBuffer;
-			
 		}
 		
 		//On va déterminer la longueur du message à coder une fois qu'il a été transformé en valeur ASCII
@@ -291,7 +283,7 @@ System.out.println("La clé temporaire b est tel que b = " + b.toString());
 		BigInteger g = BigInteger.ZERO;
 		BigInteger p = BigInteger.ZERO;
 		BigInteger y = BigInteger.ZERO;
-		BigInteger C = BigInteger.ZERO;
+		String C = "";
 		BigInteger Y = BigInteger.ZERO;
 		BigInteger s = BigInteger.ZERO;
 		BigInteger r = BigInteger.ZERO;
@@ -341,6 +333,7 @@ System.out.println("La clé temporaire b est tel que b = " + b.toString());
 				}
 				choix = sc.nextInt();
 				if (choix < 7 && choix >0){
+					sc.nextLine();
 					break;
 				}
 		    }
@@ -372,7 +365,7 @@ System.out.println("La clé temporaire b est tel que b = " + b.toString());
 					System.out.println("a = " + cleUtilisateur.get_a().toString());
 					System.out.println("g = " + cleUtilisateur.get_g().toString());
 					System.out.println("q = " + cleUtilisateur.get_q().toString());
-					System.out.println("p = 2*q+1" + cleUtilisateur.get_p().toString());
+					System.out.println("p = 2*q+1 = " + cleUtilisateur.get_p().toString());
 					System.out.println("y = g^a mod p = " + cleUtilisateur.get_y().toString() + "\n\n");
 					break;
 					
@@ -386,7 +379,7 @@ System.out.println("La clé temporaire b est tel que b = " + b.toString());
 					//Boucle de récupération de l'entrée.
 					while (flag){
 						System.out.print("Merci d'entrer un message composé de lettre et de caractère d'espacement.\n");
-						message = sc.next();
+						message = sc.nextLine();
 						message = message.toUpperCase();
 						flag = false;
 						for (int i = 0; i<message.length(); i++){
@@ -463,17 +456,16 @@ System.out.println("La clé temporaire b est tel que b = " + b.toString());
 					//Boucle de récupération de l'entrée.
 					while (true){
 						System.out.print("Enter un entier supérieur à 0\n");
-						if (!sc.hasNextBigInteger()){
-							sc.nextLine();
+						if (!sc.hasNext()){
 							System.out.println("Vous n'avez pas entré un nombre entier\n");
 							continue;
 						}
-						C = sc.nextBigInteger();
-						if (C.compareTo(BigInteger.ZERO) == 1){
+						else{
+							C = sc.next();
 							break;
 						}
 				    }
-					messageEncrypte.set_c(C.toString());
+					messageEncrypte.set_c(C);
 					
 					System.out.println("Merci d'entrer Y = g^b mod p :");
 					//Boucle de récupération de l'entrée.
@@ -494,7 +486,7 @@ System.out.println("La clé temporaire b est tel que b = " + b.toString());
 					System.out.println("Merci d'entrée la clé secrète \"a\"");
 					//Boucle de récupération de l'entrée.
 					while (true){
-						System.out.print("\nEnter un entier supérieur à 0\n");
+						System.out.print("Enter un entier supérieur à 0\n");
 						if (!sc.hasNextBigInteger()){
 							sc.nextLine();
 							System.out.println("Vous n'avez pas entré un nombre entier\n");

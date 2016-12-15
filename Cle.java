@@ -1,15 +1,14 @@
-package devoir2_secu;
 
 import java.math.BigInteger;
 
 public class Cle {
 	
-	private BigInteger a; // a est la clé privée, >1 et < p
-	private BigInteger y; // y est égal à (g^a) mod p
-	private BigInteger q; // q est un nombre premier sur lequel va se baser la sécurté du système.
-	private BigInteger p; // p est un premier tq p = 2q+1
-	private BigInteger g; // g est un générateur de Z* p qui génère un sous-groupe d'ordre q
-	private int nbBits;
+	private BigInteger a; 	// a est la clé privée, >1 et < p
+	private BigInteger y; 	// y est égal à (g^a) mod p
+	private BigInteger q; 	// q est un nombre premier sur lequel va se baser la sécurté du système.
+	private BigInteger p; 	// p est un premier tq p = 2q+1
+	private BigInteger g; 	// g est un générateur de Z* p qui génère un sous-groupe d'ordre q
+	private int nbBits; 	// le nombre de bit sur lequel on travaille
 
 	
 	public Cle (BigInteger a, BigInteger g, BigInteger gExpAmodP, BigInteger p, int nbBits){

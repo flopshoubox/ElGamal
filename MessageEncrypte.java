@@ -1,11 +1,10 @@
-package devoir2_secu;
 
 import java.math.BigInteger;
 
 public class MessageEncrypte {
 
-		private String c; //Le message crypté
-		private BigInteger Y;
+		private String c; 		//Le message crypté
+		private BigInteger Y;	//g^b mod p
 		
 		public MessageEncrypte(String c, BigInteger Y){
 			this.c = c;

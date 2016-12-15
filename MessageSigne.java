@@ -1,10 +1,9 @@
-package devoir2_secu;
 
 import java.math.BigInteger;
 
 public class MessageSigne {
 
-		private BigInteger s; //Le message crypté
+		private BigInteger s; //La signature du message
 		private BigInteger r; //g^k mod p
 		
 		public MessageSigne(BigInteger s, BigInteger r){
